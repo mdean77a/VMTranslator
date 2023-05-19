@@ -9,6 +9,9 @@ import Foundation
 import RegexBuilder
 
 struct Parser {
+    // This parser is entirely based on regular expressions as recently implemented in Swift 5.7
+    // and this greatly simplifies my thought process.  The special feature is the Capture(as:) command
+    // that then allows passing parsed components by name to the calling routines.
     
     func pushInstruction(line:String) -> (CommandType, String, String)? {
         let segment = Reference(Substring.self)
