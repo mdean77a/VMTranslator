@@ -18,6 +18,7 @@ var codeWriter = CodeWriter()
 // It is concatenated onto symbolic labels and iterated by an code generation that
 // includes symbolic labels.  A cludge but it works.
 var lineCounter = 0
+var fileName = ""
 
 enum CommandType {
     case C_ARITHMETIC, C_PUSH, C_POP, C_LABEL, C_GOTO, C_IF, C_FUNCTION, C_RETURN, C_CALL
@@ -35,6 +36,8 @@ func processFiles(){
         return
     }
     
+    fileName = String(CommandLine.arguments[1].split(separator: ".").first!)
+   
     guard let asmFile = freopen(CommandLine.arguments[1].split(separator: ".").first! + ".asm", "w", stdout) else {
         return
     }

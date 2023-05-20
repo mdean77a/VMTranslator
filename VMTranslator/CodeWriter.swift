@@ -219,6 +219,42 @@ struct CodeWriter{
                 @SP
                 M=M+1
                 """
+        case "pointer":
+            if value == "0" {
+                return
+                    """
+                    @THIS
+                    D=M
+                    @SP
+                    A=M
+                    M=D
+                    @SP
+                    M=M+1
+                    """
+                } else
+                {
+                return
+                    """
+                    @THAT
+                    D=M
+                    @SP
+                    A=M
+                    M=D
+                    @SP
+                    M=M+1
+                    """
+                }
+        case "static":
+            return
+                """
+                    @\(fileName).\(value)
+                    D=M
+                    @SP
+                    A=M
+                    M=D
+                    @SP
+                    M=M+1
+                """
         default:
             return ""
         }
@@ -327,6 +363,39 @@ func popCommand(segment:String, value:String)-> String? {
             @R13
             A=M
             M=D
+            """
+    case "pointer":
+        if value == "0" {
+            return
+                """
+                @SP
+                M=M-1
+                A=M
+                D=M
+                @THIS
+                M=D
+                """
+            } else
+            {
+            return
+                """
+                @SP
+                M=M-1
+                A=M
+                D=M
+                @THAT
+                M=D
+                """
+            }
+    case "static":
+        return
+            """
+               @SP
+               M=M-1
+               A=M
+               D=M
+               @\(fileName).\(value)
+               M=D
             """
     default:
         return ""
