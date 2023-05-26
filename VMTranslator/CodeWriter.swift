@@ -20,6 +20,7 @@ struct CodeWriter{
     let comparisonSucceeded = "@SP\nM=M\nA=M\nM=-1\n"   // Pushes true onto stack (-1)
     let pushSegmentValueToStack1 =  "D=M\n@R13\nM=D\n" //\(value)\nD=A\n@R13\nD=D+M\n@R14\nM=D\nA=D\nD=M\n"
     let pushSegmentValueToStack2 =  "\nD=A\n@R13\nD=D+M\n@R14\nM=D\nA=D\nD=M\n"
+    
     // I KNOW that I should clean this code up to be more succinct.  I started out writing
     // assembly and after the first few, came up with some strings (shown above) to make it
     // easier.  But I clearly don't have the best patterns captured.  May revisit this

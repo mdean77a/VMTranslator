@@ -26,44 +26,119 @@ enum CommandType {
 // Do not need C_ARITHMETIC but here for completeness with textbook API.  For C_ARITHMETIC
 // commands, the operand itself can be used as a selector in a switch statement.
 
-func processFiles(){
-    // Make sure that there is a file name or abort program
+//func processFiles(){
+//    // Make sure that there is a file name or abort program
+//    if CommandLine.arguments.dropFirst().count == 0 {
+//        return
+//    }
+//
+//    guard let sourceFile = freopen(CommandLine.arguments[1], "r", stdin) else {
+//        return
+//    }
+//
+//    fileName = String(CommandLine.arguments[1].split(separator: ".").first!)
+//
+//    guard let asmFile = freopen(fileName + ".asm", "w", stdout) else {
+//        return
+//    }
+//    defer {
+//        fclose(sourceFile)
+//        fclose(asmFile)
+//    }
+//
+//    while let line = readLine(){
+//        if let (commandType, segment, value) = parser.pushInstruction(line: line){
+//            // call Codewriter routine to handle push instruction
+//            print("// push \(segment) \(value) " )  // My comment line
+//            print(codeWriter.writePushPop(command:commandType, segment: segment, value: value) ?? "")
+//        }
+//
+//        if let (commandType, segment, value) = parser.popInstruction(line: line){
+//            // call Codewriter routine to handle pop instruction
+//            print("// pop  " + segment + " " + value )  // My comment line
+//            print(codeWriter.writePushPop(command:commandType, segment: segment, value: value) ?? "")
+//        }
+//
+//        if let (operand) = parser.arithmeticInstruction(line: line){
+//            // call Codewriter routine to handle arithmetic instruction
+//            print("// " + operand)  // My comment line
+//            print(codeWriter.writeArithmetic(operand: operand) ?? "")
+//        }
+//    }
+//}
+//processFiles()
+func openFiles(){
     if CommandLine.arguments.dropFirst().count == 0 {
+        print("You need to provide a vm filename or a directory.")
         return
     }
     
+    // Process the single vm file situation
+    if CommandLine.arguments[1].split(separator: ".").last == "vm" {
+        fileName = String(CommandLine.arguments[1].split(separator: ".").first!)
+        processFile(fileName:fileName)
+    }
+    
+    // Argument was not VM file.  Check to see if it is a directory and process:
+    let url = URL(fileURLWithPath: CommandLine.arguments[1])
+    if url.hasDirectoryPath {
+        let enumerator = FileManager.default.enumerator(atPath: url.lastPathComponent)
+        let filePaths = enumerator?.allObjects as! [String]
+        let vmFilePaths = filePaths.filter{$0.contains(".vm")}
+        if vmFilePaths.isEmpty {
+            print("The directory contains no vm files.")
+            return
+        }
+        for vmFile in vmFilePaths{
+            fileName = url.lastPathComponent + "/" + vmFile.split(separator: ".").first!
+            print("Processing " + fileName + " by calling processFile")
+            processFile(fileName: fileName)
+        }
+    }
+}
+
+
+func processFile(fileName:String) {
+    print("Received filename in process files " + fileName)
     guard let sourceFile = freopen(CommandLine.arguments[1], "r", stdin) else {
+        print("Could not open the file.")
         return
     }
     
-    fileName = String(CommandLine.arguments[1].split(separator: ".").first!)
-   
-    guard let asmFile = freopen(CommandLine.arguments[1].split(separator: ".").first! + ".asm", "w", stdout) else {
-        return
-    }
+    guard let asmFile = freopen(fileName + ".asm", "w", stdout)
+    else {
+        print("Could not create target file.")
+        return}
+    
     defer {
         fclose(sourceFile)
         fclose(asmFile)
     }
     
-    while let line = readLine(){
-        if let (commandType, segment, value) = parser.pushInstruction(line: line){
-            // call Codewriter routine to handle push instruction
-            print("// push \(segment) \(value) " )  // My comment line
-            print(codeWriter.writePushPop(command:commandType, segment: segment, value: value) ?? "")
+
+        while let line = readLine(){
+            if let (commandType, segment, value) = parser.pushInstruction(line: line){
+                // call Codewriter routine to handle push instruction
+                print("// push \(segment) \(value) " )  // My comment line
+                print(codeWriter.writePushPop(command:commandType, segment: segment, value: value) ?? "")
+            }
+            
+            if let (commandType, segment, value) = parser.popInstruction(line: line){
+                // call Codewriter routine to handle pop instruction
+                print("// pop  " + segment + " " + value )  // My comment line
+                print(codeWriter.writePushPop(command:commandType, segment: segment, value: value) ?? "")
+            }
+            
+            if let (operand) = parser.arithmeticInstruction(line: line){
+                // call Codewriter routine to handle arithmetic instruction
+                print("// " + operand)  // My comment line
+                print(codeWriter.writeArithmetic(operand: operand) ?? "")
+            }
         }
-        
-        if let (commandType, segment, value) = parser.popInstruction(line: line){
-            // call Codewriter routine to handle pop instruction
-            print("// pop  " + segment + " " + value )  // My comment line
-            print(codeWriter.writePushPop(command:commandType, segment: segment, value: value) ?? "")
-        }
-        
-        if let (operand) = parser.arithmeticInstruction(line: line){
-            // call Codewriter routine to handle arithmetic instruction
-            print("// " + operand)  // My comment line
-            print(codeWriter.writeArithmetic(operand: operand) ?? "")
-        }
-    }
+
+    
+    return
 }
-processFiles()
+
+
+openFiles()
