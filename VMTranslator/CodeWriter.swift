@@ -20,6 +20,7 @@ struct CodeWriter{
     let comparisonSucceeded = "@SP\nA=M\nM=-1\n"   // Pushes true onto stack (-1)
     let pushSegmentValueToStack1 =  "D=M\n@R13\nM=D\n" //\(value)\nD=A\n@R13\nD=D+M\n@R14\nM=D\nA=D\nD=M\n"
     let pushSegmentValueToStack2 =  "\nD=A\n@R13\nD=D+M\n@R14\nM=D\nA=D\nD=M\n"
+    let stashIn13 = "D=M\n@R13\nM=D"
     
     // I KNOW that I should clean this code up to be more succinct.  I started out writing
     // assembly and after the first few, came up with some strings (shown above) to make it
@@ -119,9 +120,7 @@ struct CodeWriter{
             return
                 """
                 @LCL
-                D=M
-                @R13
-                M=D
+                \(stashIn13)
                 @\(value)
                 D=A
                 @R13
@@ -140,9 +139,7 @@ struct CodeWriter{
             return
                 """
                 @ARG
-                D=M
-                @R13
-                M=D
+                \(stashIn13)
                 @\(value)
                 D=A
                 @R13
@@ -154,16 +151,13 @@ struct CodeWriter{
                 @SP
                 A=M
                 M=D
-                @SP
-                M=M+1
+                \(incrementSP)
                 """
         case "this":
             return
                 """
                 @THIS
-                D=M
-                @R13
-                M=D
+                \(stashIn13)
                 @\(value)
                 D=A
                 @R13
@@ -175,16 +169,13 @@ struct CodeWriter{
                 @SP
                 A=M
                 M=D
-                @SP
-                M=M+1
+                \(incrementSP)
                 """
         case "that":
             return
                 """
                 @THAT
-                D=M
-                @R13
-                M=D
+                \(stashIn13)
                 @\(value)
                 D=A
                 @R13
@@ -196,8 +187,131 @@ struct CodeWriter{
                 @SP
                 A=M
                 M=D
+                \(incrementSP)
+                """
+        case "temp":
+            return
+                """
+                @5
+                \(stashIn13)
+                @\(value)
+                D=A
+                @R13
+                D=D+M
+                @R14
+                M=D
+                A=D
+                D=M
                 @SP
-                M=M+1
+                A=M
+                M=D
+                \(incrementSP)
+                """
+        case "pointer":
+            if value == "0" {
+                return
+                    """
+                    @THIS
+                    D=M
+                    @SP
+                    A=M
+                    M=D
+                    \(incrementSP)
+                    """
+            } else
+            {
+                return
+                    """
+                    @THAT
+                    D=M
+                    @SP
+                    A=M
+                    M=D
+                    \(incrementSP)
+                    """
+            }
+        case "static":
+            return
+                """
+                @\(fileName).\(value)
+                D=M
+                @SP
+                A=M
+                M=D
+                \(incrementSP)
+                """
+        default:
+            return ""
+        }
+        
+    }
+    
+    
+    func popCommand(segment:String, value:String)-> String? {
+        switch segment {
+        case "local":
+            return
+                """
+                @LCL
+                \(stashIn13)
+                @\(value)
+                D=A
+                @R13
+                D=D+M
+                M=D
+                \(decrementSP)
+                \(assignD)
+                @R13
+                A=M
+                M=D
+                """
+        case "argument":
+            return
+                """
+                @ARG
+                \(stashIn13)
+                @\(value)
+                D=A
+                @R13
+                D=D+M
+                M=D
+                \(decrementSP)
+                \(assignD)
+                @R13
+                A=M
+                M=D
+                """
+        case "this":
+            return
+                """
+                @THIS
+                \(stashIn13)
+                @\(value)
+                D=A
+                @R13
+                D=D+M
+                M=D
+                \(decrementSP)
+                \(assignD)
+                @R13
+                A=M
+                M=D
+                """
+        case "that":
+            return
+                """
+                @THAT
+                \(stashIn13)
+                @\(value)
+                D=A
+                @R13
+                D=D+M
+                M=D
+                \(decrementSP)
+                \(assignD)
+                @R13
+                A=M
+                M=D
                 """
         case "temp":
             return
@@ -210,197 +324,44 @@ struct CodeWriter{
                 D=A
                 @R13
                 D=D+M
-                @R14
                 M=D
-                A=D
-                D=M
-                @SP
+                \(decrementSP)
+                \(assignD)
+                @R13
                 A=M
                 M=D
-                @SP
-                M=M+1
                 """
         case "pointer":
             if value == "0" {
                 return
                     """
+                    \(decrementSP)
+                    \(assignD)
                     @THIS
-                    D=M
-                    @SP
-                    A=M
                     M=D
-                    @SP
-                    M=M+1
-                    """
-                } else
-                {
-                return
-                    """
-                    @THAT
-                    D=M
-                    @SP
-                    A=M
-                    M=D
-                    @SP
-                    M=M+1
-                    """
-                }
-        case "static":
-            return
-                """
-                    @\(fileName).\(value)
-                    D=M
-                    @SP
-                    A=M
-                    M=D
-                    @SP
-                    M=M+1
-                """
-        default:
-            return ""
-        }
-
-    }
-}
-
-func popCommand(segment:String, value:String)-> String? {
-    switch segment {
-    case "local":
-        return
-            """
-            @LCL
-            D=M
-            @R13
-            M=D
-            @\(value)
-            D=A
-            @R13
-            D=D+M
-            M=D
-            @SP
-            M=M-1
-            A=M
-            D=M
-            @R13
-            A=M
-            M=D
-            """
-    case "argument":
-        return
-            """
-            @ARG
-            D=M
-            @R13
-            M=D
-            @\(value)
-            D=A
-            @R13
-            D=D+M
-            M=D
-            @SP
-            M=M-1
-            A=M
-            D=M
-            @R13
-            A=M
-            M=D
-            """
-    case "this":
-        return
-            """
-            @THIS
-            D=M
-            @R13
-            M=D
-            @\(value)
-            D=A
-            @R13
-            D=D+M
-            M=D
-            @SP
-            M=M-1
-            A=M
-            D=M
-            @R13
-            A=M
-            M=D
-            """
-    case "that":
-        return
-            """
-            @THAT
-            D=M
-            @R13
-            M=D
-            @\(value)
-            D=A
-            @R13
-            D=D+M
-            M=D
-            @SP
-            M=M-1
-            A=M
-            D=M
-            @R13
-            A=M
-            M=D
-            """
-    case "temp":
-        return
-            """
-            @5
-            D=A
-            @R13
-            M=D
-            @\(value)
-            D=A
-            @R13
-            D=D+M
-            M=D
-            @SP
-            M=M-1
-            A=M
-            D=M
-            @R13
-            A=M
-            M=D
-            """
-    case "pointer":
-        if value == "0" {
-            return
-                """
-                @SP
-                M=M-1
-                A=M
-                D=M
-                @THIS
-                M=D
                 """
             } else
             {
+                return
+                    """
+                    \(decrementSP)
+                    \(assignD)
+                    @THAT
+                    M=D
+                    """
+            }
+        case "static":
             return
                 """
-                @SP
-                M=M-1
-                A=M
-                D=M
-                @THAT
+                \(decrementSP)
+                \(assignD)
+                @\(fileName).\(value)
                 M=D
                 """
-            }
-    case "static":
-        return
-            """
-               @SP
-               M=M-1
-               A=M
-               D=M
-               @\(fileName).\(value)
-               M=D
-            """
-    default:
-        return ""
-    
+        default:
+            return ""
+            
+        }
     }
+    
 }
-
