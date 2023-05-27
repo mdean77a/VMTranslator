@@ -16,8 +16,8 @@ struct CodeWriter{
     let assignD = "A=M\nD=M\n"
     let assignA = "A=M\n"
     let comparison = "@R13\nD=D-M\n"
-    let comparisonFailed = "@SP\nM=M\nA=M\nM=0\n"       // Pushes false onto stack (0)
-    let comparisonSucceeded = "@SP\nM=M\nA=M\nM=-1\n"   // Pushes true onto stack (-1)
+    let comparisonFailed = "@SP\nA=M\nM=0\n"       // Pushes false onto stack (0)
+    let comparisonSucceeded = "@SP\nA=M\nM=-1\n"   // Pushes true onto stack (-1)
     let pushSegmentValueToStack1 =  "D=M\n@R13\nM=D\n" //\(value)\nD=A\n@R13\nD=D+M\n@R14\nM=D\nA=D\nD=M\n"
     let pushSegmentValueToStack2 =  "\nD=A\n@R13\nD=D+M\n@R14\nM=D\nA=D\nD=M\n"
     
