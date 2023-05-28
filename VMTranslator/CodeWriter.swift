@@ -21,6 +21,7 @@ struct CodeWriter{
     let pushSegmentValueToStack1 =  "D=M\n@R13\nM=D\n" //\(value)\nD=A\n@R13\nD=D+M\n@R14\nM=D\nA=D\nD=M\n"
     let pushSegmentValueToStack2 =  "\nD=A\n@R13\nD=D+M\n@R14\nM=D\nA=D\nD=M\n"
     let stashIn13 = "D=M\n@R13\nM=D"
+    let D2SP = "D=M\n@SP\nA=M\nM=D\n"
     
     // I KNOW that I should clean this code up to be more succinct.  I started out writing
     // assembly and after the first few, came up with some strings (shown above) to make it
@@ -122,18 +123,11 @@ struct CodeWriter{
                 @LCL
                 \(stashIn13)
                 @\(value)
-                D=A
-                @R13
-                D=D+M
-                @R14
-                M=D
-                A=D
-                D=M
+                \(pushSegmentValueToStack2)
                 @SP
                 A=M
                 M=D
-                @SP
-                M=M+1
+                \(incrementSP)
                 """
         case "argument":
             return
@@ -141,13 +135,7 @@ struct CodeWriter{
                 @ARG
                 \(stashIn13)
                 @\(value)
-                D=A
-                @R13
-                D=D+M
-                @R14
-                M=D
-                A=D
-                D=M
+                \(pushSegmentValueToStack2)
                 @SP
                 A=M
                 M=D
@@ -159,13 +147,7 @@ struct CodeWriter{
                 @THIS
                 \(stashIn13)
                 @\(value)
-                D=A
-                @R13
-                D=D+M
-                @R14
-                M=D
-                A=D
-                D=M
+                \(pushSegmentValueToStack2)
                 @SP
                 A=M
                 M=D
@@ -177,13 +159,7 @@ struct CodeWriter{
                 @THAT
                 \(stashIn13)
                 @\(value)
-                D=A
-                @R13
-                D=D+M
-                @R14
-                M=D
-                A=D
-                D=M
+                \(pushSegmentValueToStack2)
                 @SP
                 A=M
                 M=D
@@ -195,13 +171,7 @@ struct CodeWriter{
                 @5
                 \(stashIn13)
                 @\(value)
-                D=A
-                @R13
-                D=D+M
-                @R14
-                M=D
-                A=D
-                D=M
+                \(pushSegmentValueToStack2)
                 @SP
                 A=M
                 M=D
@@ -212,10 +182,7 @@ struct CodeWriter{
                 return
                     """
                     @THIS
-                    D=M
-                    @SP
-                    A=M
-                    M=D
+                    \(D2SP)
                     \(incrementSP)
                     """
             } else
@@ -223,10 +190,7 @@ struct CodeWriter{
                 return
                     """
                     @THAT
-                    D=M
-                    @SP
-                    A=M
-                    M=D
+                    \(D2SP)
                     \(incrementSP)
                     """
             }
@@ -234,10 +198,7 @@ struct CodeWriter{
             return
                 """
                 @\(fileName).\(value)
-                D=M
-                @SP
-                A=M
-                M=D
+                \(D2SP)
                 \(incrementSP)
                 """
         default:
