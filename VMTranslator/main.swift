@@ -26,6 +26,11 @@ enum CommandType {
 // Do not need C_ARITHMETIC but here for completeness with textbook API.  For C_ARITHMETIC
 // commands, the operand itself can be used as a selector in a switch statement.
 
+func bootStrapCode() -> String {
+    // This function will create the code to initialize the computer and will call the required program to start the game.
+    return("///  BOOTSTRAP CODE TO BE DEVELOPED")
+}
+
 func openFiles(){
     if CommandLine.arguments.dropFirst().count == 0 {
         print("USAGE: You need to provide a vm filename or a directory containing vm files.")
@@ -35,12 +40,25 @@ func openFiles(){
     // Process the single vm file situation
     if CommandLine.arguments[1].split(separator: ".").last == "vm" {
         fileName = String(CommandLine.arguments[1].split(separator: ".").first!)
+        guard let sourceFile = freopen(fileName + ".vm", "r", stdin) else {
+            print("ERROR: Could not open the source file.")
+            return
+        }
+        guard let asmFile = freopen(fileName + ".asm", "w", stdout)
+        else {
+            print("ERROR: Could not create target file.")
+            return}
+        print(bootStrapCode())
         processFile(fileName:fileName)
+        
+        fclose(sourceFile)
+        fclose(asmFile)
     }
     
     // Argument was not VM file.  Check to see if it is a directory and process:
     let url = URL(fileURLWithPath: CommandLine.arguments[1])
     if url.hasDirectoryPath {
+        let directoryName = url.lastPathComponent
         let enumerator = FileManager.default.enumerator(atPath: url.lastPathComponent)
         let filePaths = enumerator?.allObjects as! [String]
         let vmFilePaths = filePaths.filter{$0.contains(".vm")}
@@ -48,57 +66,50 @@ func openFiles(){
             print("ERROR: The directory contains no vm files.")
             return
         }
+        // Create single target file with name of directory, INSIDE the directory.
+        guard let asmFile = freopen(url.lastPathComponent + "/" + directoryName + ".asm", "w", stdout)
+        else {
+            print("ERROR: Could not create target file.")
+            return}
+        print(bootStrapCode())
         for vmFile in vmFilePaths{
             fileName = url.lastPathComponent + "/" + vmFile.split(separator: ".").first!
+            guard let sourceFile = freopen(fileName + ".vm", "r", stdin) else {
+                print("ERROR: Could not open the source file.")
+                return
+            }
+            
             processFile(fileName: fileName)
+            fclose(sourceFile)
         }
+        fclose(asmFile)
     }
 }
 
 
 func processFile(fileName:String) {
-    print("Received filename in process files " + fileName)
-    guard let sourceFile = freopen(fileName + ".vm", "r", stdin) else {
-        print("ERROR: Could not open the source file.")
-        return
-    }
-    
-    guard let asmFile = freopen(fileName + ".asm", "w", stdout)
-    else {
-        print("ERROR: Could not create target file.")
-        return}
-    
-    defer {
-        fclose(sourceFile)
-        fclose(asmFile)
-    }
     
     print("//  Assembly translation of \(fileName).vm")
-    print("//  J. Michael Dean VMTranslator, execution time: \(Date().addingTimeInterval(-21600))")
-    print("//")
-        while let line = readLine(){
-            if let (commandType, segment, value) = parser.pushInstruction(line: line){
-                // call Codewriter routine to handle push instruction
-                print("// push \(segment) \(value) " )  // My comment line
-                print(codeWriter.writePushPop(command:commandType, segment: segment, value: value) ?? "")
-            }
-            
-            if let (commandType, segment, value) = parser.popInstruction(line: line){
-                // call Codewriter routine to handle pop instruction
-                print("// pop  " + segment + " " + value )  // My comment line
-                print(codeWriter.writePushPop(command:commandType, segment: segment, value: value) ?? "")
-            }
-            
-            if let (operand) = parser.arithmeticInstruction(line: line){
-                // call Codewriter routine to handle arithmetic instruction
-                print("// " + operand)  // My comment line
-                print(codeWriter.writeArithmetic(operand: operand) ?? "")
-            }
+    while let line = readLine(){
+        if let (commandType, segment, value) = parser.pushInstruction(line: line){
+            // call Codewriter routine to handle push instruction
+            print("// push \(segment) \(value) " )  // My comment line
+            print(codeWriter.writePushPop(command:commandType, segment: segment, value: value) ?? "")
         }
-    print("//  End of assembly translation of \(fileName).vm")
-    print("//  J. Michael Dean VMTranslator, completion time: \(Date().addingTimeInterval(-21600))")
+        
+        if let (commandType, segment, value) = parser.popInstruction(line: line){
+            // call Codewriter routine to handle pop instruction
+            print("// pop  " + segment + " " + value )  // My comment line
+            print(codeWriter.writePushPop(command:commandType, segment: segment, value: value) ?? "")
+        }
+        
+        if let (operand) = parser.arithmeticInstruction(line: line){
+            // call Codewriter routine to handle arithmetic instruction
+            print("// " + operand)  // My comment line
+            print(codeWriter.writeArithmetic(operand: operand) ?? "")
+        }
+    }
     return
 }
-
 
 openFiles()
