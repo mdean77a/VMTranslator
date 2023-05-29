@@ -28,6 +28,8 @@ struct CodeWriter{
     // easier.  But I clearly don't have the best patterns captured.  May revisit this
     // when we get to assignment 8.
     
+      
+
     func writeArithmetic(operand:String) -> String? {
         switch operand {
         case "add":
@@ -121,85 +123,142 @@ struct CodeWriter{
             return
                 """
                 @LCL
-                \(stashIn13)
+                D=M
+                @R13
+                M=D
                 @\(value)
-                \(pushSegmentValueToStack2)
+                D=A
+                @R13
+                D=D+M
+                @R14
+                M=D
+                A=D
+                D=M
                 @SP
                 A=M
                 M=D
-                \(incrementSP)
+                @SP
+                M=M+1
                 """
         case "argument":
             return
                 """
                 @ARG
-                \(stashIn13)
+                D=M
+                @R13
+                M=D
                 @\(value)
-                \(pushSegmentValueToStack2)
+                D=A
+                @R13
+                D=D+M
+                @R14
+                M=D
+                A=D
+                D=M
                 @SP
                 A=M
                 M=D
-                \(incrementSP)
+                @SP
+                M=M+1
                 """
         case "this":
             return
                 """
                 @THIS
-                \(stashIn13)
+                D=M
+                @R13
+                M=D
                 @\(value)
-                \(pushSegmentValueToStack2)
+                D=A
+                @R13
+                D=D+M
+                @R14
+                M=D
+                A=D
+                D=M
                 @SP
                 A=M
                 M=D
-                \(incrementSP)
+                @SP
+                M=M+1
                 """
         case "that":
             return
                 """
                 @THAT
-                \(stashIn13)
+                D=M
+                @R13
+                M=D
                 @\(value)
-                \(pushSegmentValueToStack2)
+                D=A
+                @R13
+                D=D+M
+                @R14
+                M=D
+                A=D
+                D=M
                 @SP
                 A=M
                 M=D
-                \(incrementSP)
+                @SP
+                M=M+1
                 """
         case "temp":
             return
                 """
                 @5
-                \(stashIn13)
+                D=A
+                @R13
+                M=D
                 @\(value)
-                \(pushSegmentValueToStack2)
+                D=A
+                @R13
+                D=D+M
+                @R14
+                M=D
+                A=D
+                D=M
                 @SP
                 A=M
                 M=D
-                \(incrementSP)
+                @SP
+                M=M+1
                 """
         case "pointer":
             if value == "0" {
                 return
                     """
                     @THIS
-                    \(D2SP)
-                    \(incrementSP)
+                    D=M
+                    @SP
+                    A=M
+                    M=D
+                    @SP
+                    M=M+1
                     """
             } else
             {
                 return
                     """
                     @THAT
-                    \(D2SP)
-                    \(incrementSP)
+                    D=M
+                    @SP
+                    A=M
+                    M=D
+                    @SP
+                    M=M+1
                     """
             }
         case "static":
             return
                 """
-                @\(fileName).\(value)
-                \(D2SP)
-                \(incrementSP)
+                    @\(fileName).\(value)
+                    D=M
+                    @SP
+                    A=M
+                    M=D
+                    @SP
+                    M=M+1
                 """
         default:
             return ""
@@ -212,113 +271,137 @@ struct CodeWriter{
         switch segment {
         case "local":
             return
-                """
-                @LCL
-                \(stashIn13)
-                @\(value)
-                D=A
-                @R13
-                D=D+M
-                M=D
-                \(decrementSP)
-                \(assignD)
-                @R13
-                A=M
-                M=D
-                """
+            """
+            @LCL
+            D=M
+            @R13
+            M=D
+            @\(value)
+            D=A
+            @R13
+            D=D+M
+            M=D
+            @SP
+            M=M-1
+            A=M
+            D=M
+            @R13
+            A=M
+            M=D
+            """
         case "argument":
             return
-                """
-                @ARG
-                \(stashIn13)
-                @\(value)
-                D=A
-                @R13
-                D=D+M
-                M=D
-                \(decrementSP)
-                \(assignD)
-                @R13
-                A=M
-                M=D
-                """
+            """
+            @ARG
+            D=M
+            @R13
+            M=D
+            @\(value)
+            D=A
+            @R13
+            D=D+M
+            M=D
+            @SP
+            M=M-1
+            A=M
+            D=M
+            @R13
+            A=M
+            M=D
+            """
         case "this":
             return
-                """
-                @THIS
-                \(stashIn13)
-                @\(value)
-                D=A
-                @R13
-                D=D+M
-                M=D
-                \(decrementSP)
-                \(assignD)
-                @R13
-                A=M
-                M=D
-                """
+            """
+            @THIS
+            D=M
+            @R13
+            M=D
+            @\(value)
+            D=A
+            @R13
+            D=D+M
+            M=D
+            @SP
+            M=M-1
+            A=M
+            D=M
+            @R13
+            A=M
+            M=D
+            """
         case "that":
             return
-                """
-                @THAT
-                \(stashIn13)
-                @\(value)
-                D=A
-                @R13
-                D=D+M
-                M=D
-                \(decrementSP)
-                \(assignD)
-                @R13
-                A=M
-                M=D
-                """
+            """
+            @THAT
+            D=M
+            @R13
+            M=D
+            @\(value)
+            D=A
+            @R13
+            D=D+M
+            M=D
+            @SP
+            M=M-1
+            A=M
+            D=M
+            @R13
+            A=M
+            M=D
+            """
         case "temp":
             return
-                """
-                @5
-                D=A
-                @R13
-                M=D
-                @\(value)
-                D=A
-                @R13
-                D=D+M
-                M=D
-                \(decrementSP)
-                \(assignD)
-                @R13
-                A=M
-                M=D
-                """
+            """
+            @5
+            D=A
+            @R13
+            M=D
+            @\(value)
+            D=A
+            @R13
+            D=D+M
+            M=D
+            @SP
+            M=M-1
+            A=M
+            D=M
+            @R13
+            A=M
+            M=D
+            """
         case "pointer":
             if value == "0" {
                 return
-                    """
-                    \(decrementSP)
-                    \(assignD)
-                    @THIS
-                    M=D
+                """
+                @SP
+                M=M-1
+                A=M
+                D=M
+                @THIS
+                M=D
                 """
             } else
             {
                 return
-                    """
-                    \(decrementSP)
-                    \(assignD)
-                    @THAT
-                    M=D
-                    """
+                """
+                @SP
+                M=M-1
+                A=M
+                D=M
+                @THAT
+                M=D
+                """
             }
         case "static":
             return
-                """
-                \(decrementSP)
-                \(assignD)
-                @\(fileName).\(value)
-                M=D
-                """
+            """
+               @SP
+               M=M-1
+               A=M
+               D=M
+               @\(fileName).\(value)
+               M=D
+            """
         default:
             return ""
             
@@ -326,3 +409,5 @@ struct CodeWriter{
     }
     
 }
+
+
