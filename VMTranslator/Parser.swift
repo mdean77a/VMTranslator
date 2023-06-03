@@ -68,5 +68,35 @@ struct Parser {
             return nil
         }
     }
+    
+    func labelInstruction(line:String) ->  String? {
+        let labelSymbol = Reference(Substring.self)
+        let labelPattern = Regex {
+            /^\s*label\s+/
+            Capture(as:labelSymbol){
+                /\S+/
+            }
+        }
+        if let match = try? labelPattern.firstMatch(in: line){
+            return(String(match[labelSymbol]))
+        } else {
+            return nil
+        }
+    }
+    
+    func ifGotoInstruction(line:String) ->  String? {
+        let labelSymbol = Reference(Substring.self)
+        let labelPattern = Regex {
+            /^\s*if-goto\s+/
+            Capture(as:labelSymbol){
+                /\S+/
+            }
+        }
+        if let match = try? labelPattern.firstMatch(in: line){
+            return(String(match[labelSymbol]))
+        } else {
+            return nil
+        }
+    }
 }
 

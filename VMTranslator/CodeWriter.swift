@@ -99,7 +99,7 @@ struct CodeWriter{
         case "not":
             return "\(decrementSP)\(assignA)M=!M\n\(incrementSP)"
         default:
-            return "//  ERROR - invalid operand"
+            return nil
         }
     }
     
@@ -266,7 +266,6 @@ struct CodeWriter{
         
     }
     
-    
     func popCommand(segment:String, value:String)-> String? {
         switch segment {
         case "local":
@@ -408,6 +407,17 @@ struct CodeWriter{
         }
     }
     
+    func writeLabel(label:String) -> String? {
+        return "(\(label))"
+    }
+    
+    func writeGoto(label:String) -> String?{
+        return "@\(label)\n0;JMP\n"
+    }
+    
+    func writeIfGoto(label:String) -> String?{
+        return "\(decrementSP)@SP\n\(assignD)@\(label)\nD;JEQ\n"
+    }
 }
 
 

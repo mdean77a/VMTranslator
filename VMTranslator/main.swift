@@ -23,12 +23,19 @@ var fileName = ""
 enum CommandType {
     case C_ARITHMETIC, C_PUSH, C_POP, C_LABEL, C_GOTO, C_IF, C_FUNCTION, C_RETURN, C_CALL
 }
+
+let operators: Set<String> = ["add","sub","neg","eq","gt","lt","and","or","not"]
+
 // Do not need C_ARITHMETIC but here for completeness with textbook API.  For C_ARITHMETIC
 // commands, the operand itself can be used as a selector in a switch statement.
 
 func bootStrapCode() -> String {
     // This function will create the code to initialize the computer and will call the required program to start the game.
     return("///  BOOTSTRAP CODE TO BE DEVELOPED")
+}
+
+func endProgramInfiniteLoop() -> String {
+    return "\n(END)\n@END\n0;JMP"
 }
 
 func openFiles(){
@@ -50,7 +57,7 @@ func openFiles(){
             return}
         print(bootStrapCode())
         processFile(fileName:fileName)
-        
+       // print(endProgramInfiniteLoop())
         fclose(sourceFile)
         fclose(asmFile)
     }
@@ -82,6 +89,7 @@ func openFiles(){
             processFile(fileName: fileName)
             fclose(sourceFile)
         }
+        //print(endProgramInfiniteLoop())
         fclose(asmFile)
     }
 }
@@ -105,8 +113,20 @@ func processFile(fileName:String) {
         
         if let (operand) = parser.arithmeticInstruction(line: line){
             // call Codewriter routine to handle arithmetic instruction
-            print("// " + operand)  // My comment line
-            print(codeWriter.writeArithmetic(operand: operand) ?? "")
+            if operators.contains(operand) {
+                print("// " + operand)  // My comment line
+                print(codeWriter.writeArithmetic(operand: operand) ?? "")
+            }
+        }
+        
+        if let (label) = parser.labelInstruction(line: line){
+            print("// label " + label)   // my comment line
+            print(codeWriter.writeLabel(label:label) ?? "")
+        }
+        
+        if let (label) = parser.ifGotoInstruction(line: line){
+            print("// if-goto " + label)   // my comment line
+            print(codeWriter.writeIfGoto(label:label) ?? "")
         }
     }
     return
