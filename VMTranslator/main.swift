@@ -57,7 +57,7 @@ func openFiles(){
             return}
         print(bootStrapCode())
         processFile(fileName:fileName)
-       // print(endProgramInfiniteLoop())
+        print(endProgramInfiniteLoop())
         fclose(sourceFile)
         fclose(asmFile)
     }
@@ -124,11 +124,17 @@ func processFile(fileName:String) {
             print(codeWriter.writeLabel(label:label) ?? "")
         }
         
-        if let (label) = parser.ifGotoInstruction(line: line){
-            print("// if-goto " + label)   // my comment line
-            print(codeWriter.writeIfGoto(label:label) ?? "")
+        if let (gotoDestination) = parser.gotoInstruction(line: line){
+            print("// goto " + gotoDestination)   // my comment line
+            print(codeWriter.writeGoto(gotoDestination:gotoDestination) ?? "")
+        }
+        
+        if let (gotoDestination) = parser.ifGotoInstruction(line: line){
+            print("// if-goto " + gotoDestination)   // my comment line
+            print(codeWriter.writeIfGoto(gotoDestination:gotoDestination) ?? "")
         }
     }
+    
     return
 }
 

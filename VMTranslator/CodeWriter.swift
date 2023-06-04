@@ -139,6 +139,7 @@ struct CodeWriter{
                 M=D
                 @SP
                 M=M+1
+                
                 """
         case "argument":
             return
@@ -160,6 +161,7 @@ struct CodeWriter{
                 M=D
                 @SP
                 M=M+1
+                
                 """
         case "this":
             return
@@ -181,6 +183,7 @@ struct CodeWriter{
                 M=D
                 @SP
                 M=M+1
+                
                 """
         case "that":
             return
@@ -202,6 +205,7 @@ struct CodeWriter{
                 M=D
                 @SP
                 M=M+1
+                
                 """
         case "temp":
             return
@@ -223,6 +227,7 @@ struct CodeWriter{
                 M=D
                 @SP
                 M=M+1
+                
                 """
         case "pointer":
             if value == "0" {
@@ -235,6 +240,7 @@ struct CodeWriter{
                     M=D
                     @SP
                     M=M+1
+                    
                     """
             } else
             {
@@ -247,18 +253,20 @@ struct CodeWriter{
                     M=D
                     @SP
                     M=M+1
+                    
                     """
             }
         case "static":
             return
                 """
-                    @\(fileName).\(value)
-                    D=M
-                    @SP
-                    A=M
-                    M=D
-                    @SP
-                    M=M+1
+                @\(fileName).\(value)
+                D=M
+                @SP
+                A=M
+                M=D
+                @SP
+                M=M+1
+                
                 """
         default:
             return ""
@@ -270,137 +278,145 @@ struct CodeWriter{
         switch segment {
         case "local":
             return
-            """
-            @LCL
-            D=M
-            @R13
-            M=D
-            @\(value)
-            D=A
-            @R13
-            D=D+M
-            M=D
-            @SP
-            M=M-1
-            A=M
-            D=M
-            @R13
-            A=M
-            M=D
-            """
+                """
+                @LCL
+                D=M
+                @R13
+                M=D
+                @\(value)
+                D=A
+                @R13
+                D=D+M
+                M=D
+                @SP
+                M=M-1
+                A=M
+                D=M
+                @R13
+                A=M
+                M=D
+                
+                """
         case "argument":
             return
-            """
-            @ARG
-            D=M
-            @R13
-            M=D
-            @\(value)
-            D=A
-            @R13
-            D=D+M
-            M=D
-            @SP
-            M=M-1
-            A=M
-            D=M
-            @R13
-            A=M
-            M=D
-            """
+                """
+                @ARG
+                D=M
+                @R13
+                M=D
+                @\(value)
+                D=A
+                @R13
+                D=D+M
+                M=D
+                @SP
+                M=M-1
+                A=M
+                D=M
+                @R13
+                A=M
+                M=D
+                
+                """
         case "this":
             return
-            """
-            @THIS
-            D=M
-            @R13
-            M=D
-            @\(value)
-            D=A
-            @R13
-            D=D+M
-            M=D
-            @SP
-            M=M-1
-            A=M
-            D=M
-            @R13
-            A=M
-            M=D
-            """
+                """
+                @THIS
+                D=M
+                @R13
+                M=D
+                @\(value)
+                D=A
+                @R13
+                D=D+M
+                M=D
+                @SP
+                M=M-1
+                A=M
+                D=M
+                @R13
+                A=M
+                M=D
+                
+                """
         case "that":
             return
-            """
-            @THAT
-            D=M
-            @R13
-            M=D
-            @\(value)
-            D=A
-            @R13
-            D=D+M
-            M=D
-            @SP
-            M=M-1
-            A=M
-            D=M
-            @R13
-            A=M
-            M=D
-            """
+                """
+                @THAT
+                D=M
+                @R13
+                M=D
+                @\(value)
+                D=A
+                @R13
+                D=D+M
+                M=D
+                @SP
+                M=M-1
+                A=M
+                D=M
+                @R13
+                A=M
+                M=D
+                
+                """
         case "temp":
             return
-            """
-            @5
-            D=A
-            @R13
-            M=D
-            @\(value)
-            D=A
-            @R13
-            D=D+M
-            M=D
-            @SP
-            M=M-1
-            A=M
-            D=M
-            @R13
-            A=M
-            M=D
-            """
+                """
+                @5
+                D=A
+                @R13
+                M=D
+                @\(value)
+                D=A
+                @R13
+                D=D+M
+                M=D
+                @SP
+                M=M-1
+                A=M
+                D=M
+                @R13
+                A=M
+                M=D
+                
+                """
         case "pointer":
             if value == "0" {
                 return
-                """
-                @SP
-                M=M-1
-                A=M
-                D=M
-                @THIS
-                M=D
-                """
+                    """
+                    @SP
+                    M=M-1
+                    A=M
+                    D=M
+                    @THIS
+                    M=D
+                    
+                    """
             } else
             {
                 return
+                    """
+                    @SP
+                    M=M-1
+                    A=M
+                    D=M
+                    @THAT
+                    M=D
+                    
+                    """
+            }
+        case "static":
+            return
                 """
                 @SP
                 M=M-1
                 A=M
                 D=M
-                @THAT
+                @\(fileName).\(value)
                 M=D
+                
                 """
-            }
-        case "static":
-            return
-            """
-               @SP
-               M=M-1
-               A=M
-               D=M
-               @\(fileName).\(value)
-               M=D
-            """
         default:
             return ""
             
@@ -408,15 +424,15 @@ struct CodeWriter{
     }
     
     func writeLabel(label:String) -> String? {
-        return "(\(label))"
+        return "(\(label))\n"
     }
     
-    func writeGoto(label:String) -> String?{
-        return "@\(label)\n0;JMP\n"
+    func writeGoto(gotoDestination:String) -> String?{
+        return "@\(gotoDestination)\n0;JMP\n"
     }
     
-    func writeIfGoto(label:String) -> String?{
-        return "\(decrementSP)@SP\n\(assignD)@\(label)\nD;JEQ\n"
+    func writeIfGoto(gotoDestination:String) -> String?{
+        return "\(decrementSP)@SP\n\(assignD)@\(gotoDestination)\nD;JNE\n"
     }
 }
 
