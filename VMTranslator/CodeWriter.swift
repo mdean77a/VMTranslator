@@ -434,6 +434,113 @@ struct CodeWriter{
     func writeIfGoto(gotoDestination:String) -> String?{
         return "\(decrementSP)@SP\n\(assignD)@\(gotoDestination)\nD;JNE\n"
     }
+    
+    func writeFunction(functionName:String, nVars:String) -> String? {
+        return
+            """
+            (\(functionName))
+            @\(nVars)
+            D=A
+            (INIT_LOCALS)
+            @SP
+            A=M
+            M=0
+            \(incrementSP)
+            D=D-1
+            @INIT_LOCALS
+            D;JNE
+            
+            """
+    }
+    
+    func writeCall(functionName:String, nArgs:String) -> String? {
+        lineCounter += 1
+        return
+            """
+            //  generate a return address label and push it onto stack
+            //       Have to remember to
+            //  push LCL
+            //  push ARG
+            //  push THIS
+            //  push THAT
+            //  Reposition ARG to SP-5 - nARGS
+            //  Set LCL to SP
+            //  goto functionName
+            //  insert the return address label
+            """
+    }
+    
+    func writeReturn() -> String? {
+        return
+            """
+            // create variable endFrame
+            @LCL
+            D=M
+            @endFrame
+            M=D
+
+            // calculate the return address
+            @retAddr
+            M=D            // currently endFrame
+            @5
+            D=A
+            @retAddr
+            M=M-D
+
+            // pop the stack and assign to ARG[M]
+            @SP
+            M=M-1
+            A=M
+            D=M
+            @ARG
+            A=M
+            M=D
+
+            // reset SP to ARG + 1
+            @ARG
+            D=M
+            D=D+1
+            @SP
+            M=D
+
+            // now restore the old pointers
+            @endFrame
+            D=M
+            @R13
+            M=D-1
+            @R13
+            A=M
+            D=M
+            @THAT
+            M=D
+            @R13
+            M=M-1
+            @R13
+            A=M
+            D=M
+            @THIS
+            M=D
+            @R13
+            M=M-1
+            @R13
+            A=M
+            D=M
+            @ARG
+            M=D
+            @R13
+            M=M-1
+            @R13
+            A=M
+            D=M
+            @LCL
+            M=D
+            
+            // and return
+            @retAddr
+            A=M
+            0;JMP
+            """
+    }
 }
 
 

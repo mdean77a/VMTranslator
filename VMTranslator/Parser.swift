@@ -113,5 +113,39 @@ struct Parser {
             return nil
         }
     }
+    
+    func functionInstruction(line:String) -> (String, String)? {
+        let functionName = Reference(Substring.self)
+        let nVars = Reference(Substring.self)
+        let functionPattern = Regex {
+            /^\s*function\s+/
+            Capture(as:functionName){
+                /\S+/
+            }
+            /\s+/
+            Capture(as:nVars){
+                /\d+/
+            }
+        }
+        if let match = try? functionPattern.firstMatch(in: line) {
+            return(String(match[functionName]),String(match[nVars]))
+        } else {
+            return nil
+        }
+    }
+    
+    func returnInstruction(line:String) -> String?{
+        let returnCommand = Reference(Substring.self)
+        let returnPattern = Regex {
+            Capture(as:returnCommand){
+                /^\s*return/
+            }
+        }
+        if let match =  try? returnPattern.firstMatch(in: line) {
+            return String(match[returnCommand])
+        } else {
+            return nil
+        }
+    }
 }
 

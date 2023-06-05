@@ -57,7 +57,7 @@ func openFiles(){
             return}
         print(bootStrapCode())
         processFile(fileName:fileName)
-        print(endProgramInfiniteLoop())
+        //print(endProgramInfiniteLoop())
         fclose(sourceFile)
         fclose(asmFile)
     }
@@ -99,20 +99,21 @@ func processFile(fileName:String) {
     
     print("//  Assembly translation of \(fileName).vm")
     while let line = readLine(){
+        
+        // For each type of command, call the parser for a Regex to capture the parameters
+        // and then call codeWriter to get the assembly code to emit.
+        
         if let (commandType, segment, value) = parser.pushInstruction(line: line){
-            // call Codewriter routine to handle push instruction
             print("// push \(segment) \(value) " )  // My comment line
             print(codeWriter.writePushPop(command:commandType, segment: segment, value: value) ?? "")
         }
         
         if let (commandType, segment, value) = parser.popInstruction(line: line){
-            // call Codewriter routine to handle pop instruction
             print("// pop  " + segment + " " + value )  // My comment line
             print(codeWriter.writePushPop(command:commandType, segment: segment, value: value) ?? "")
         }
         
         if let (operand) = parser.arithmeticInstruction(line: line){
-            // call Codewriter routine to handle arithmetic instruction
             if operators.contains(operand) {
                 print("// " + operand)  // My comment line
                 print(codeWriter.writeArithmetic(operand: operand) ?? "")
@@ -132,6 +133,16 @@ func processFile(fileName:String) {
         if let (gotoDestination) = parser.ifGotoInstruction(line: line){
             print("// if-goto " + gotoDestination)   // my comment line
             print(codeWriter.writeIfGoto(gotoDestination:gotoDestination) ?? "")
+        }
+        
+        if let (functionName, nVars) = parser.functionInstruction(line: line){
+            print("// function " + functionName + " " + nVars)   // my comment line
+            print(codeWriter.writeFunction(functionName: functionName, nVars: nVars) ?? "")
+        }
+        
+        if let  _ = parser.returnInstruction(line:line){
+            print("// return")
+            print(codeWriter.writeReturn() ?? "")
         }
     }
     
