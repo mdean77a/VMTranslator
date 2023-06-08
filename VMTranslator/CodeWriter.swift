@@ -424,49 +424,116 @@ struct CodeWriter{
     }
     
     func writeLabel(label:String) -> String? {
-        return "(\(label))\n"
+//        lineCounter += 1
+        return "(\(label).\(lineCounter))\n"
     }
     
     func writeGoto(gotoDestination:String) -> String?{
-        return "@\(gotoDestination)\n0;JMP\n"
+        //lineCounter += 1
+        return "@\(gotoDestination).\(lineCounter)\n0;JMP\n"
     }
     
     func writeIfGoto(gotoDestination:String) -> String?{
-        return "\(decrementSP)@SP\n\(assignD)@\(gotoDestination)\nD;JNE\n"
+        //lineCounter += 1
+        return "\(decrementSP)@SP\n\(assignD)@\(gotoDestination).\(lineCounter)\nD;JNE\n"
     }
     
     func writeFunction(functionName:String, nVars:String) -> String? {
+        lineCounter += 1
         return
             """
             (\(functionName))
             @\(nVars)
             D=A
-            (INIT_LOCALS)
+            @SKIP_INIT_LOCAL.\(lineCounter)
+            D;JEQ
+            (INIT_LOCALS.\(lineCounter))
             @SP
             A=M
             M=0
             \(incrementSP)
             D=D-1
-            @INIT_LOCALS
+            @INIT_LOCALS.\(lineCounter)
             D;JNE
+            (SKIP_INIT_LOCAL.\(lineCounter))
             
             """
     }
     
     func writeCall(functionName:String, nArgs:String) -> String? {
+        // Generate return address label string
         lineCounter += 1
+        let returnAddress = "\(functionName)$ret.\(lineCounter)"
         return
             """
-            //  generate a return address label and push it onto stack
-            //       Have to remember to
+            //  push return address label onto stack
+            @\(returnAddress)
+            D=A
+            @SP
+            A=M
+            M=D
+            \(incrementSP)
+            
             //  push LCL
+            @LCL
+            D=M
+            @SP
+            A=M
+            M=D
+            \(incrementSP)
+            
             //  push ARG
+            @ARG
+            D=M
+            @SP
+            A=M
+            M=D
+            \(incrementSP)
+            
             //  push THIS
+            @THIS
+            D=M
+            @SP
+            A=M
+            M=D
+            \(incrementSP)
+            
             //  push THAT
+            @THAT
+            D=M
+            @SP
+            A=M
+            M=D
+            \(incrementSP)
+            
             //  Reposition ARG to SP-5 - nARGS
+            @SP
+            A=M
+            D=A
+            @ARG
+            M=D
+            @5
+            D=A
+            @ARG
+            M=M-D
+            @\(nArgs)
+            D=A
+            @ARG
+            M=M-D
+            
             //  Set LCL to SP
+            @SP
+            D=M
+            @LCL
+            M=D
+            
+            
             //  goto functionName
+            @\(functionName)
+            0;JMP
+            
             //  insert the return address label
+            (\(returnAddress))
             """
     }
     
@@ -480,12 +547,19 @@ struct CodeWriter{
             M=D
 
             // calculate the return address
+            @endFrame
+            D=M
             @retAddr
             M=D            // currently endFrame
             @5
             D=A
             @retAddr
-            M=M-D
+            M=M-D            // But this is not the return address - it is the location
+            D=M
+            A=D
+            D=M
+            @retAddr
+            M=D
 
             // pop the stack and assign to ARG[M]
             @SP
@@ -495,6 +569,7 @@ struct CodeWriter{
             @ARG
             A=M
             M=D
+            
 
             // reset SP to ARG + 1
             @ARG

@@ -31,12 +31,13 @@ let operators: Set<String> = ["add","sub","neg","eq","gt","lt","and","or","not"]
 
 func bootStrapCode() -> String {
     // This function will create the code to initialize the computer and will call the required program to start the game.
-    return("///  BOOTSTRAP CODE TO BE DEVELOPED")
+    //return("@Sys.init\n0;JMP\n")  THIS IS WRONG.  NEED TO CALL Sys.init, NOT GOTO Sys.init.
+    return "// BOOTSTRAP WILL GO HERE"
 }
 
-func endProgramInfiniteLoop() -> String {
-    return "\n(END)\n@END\n0;JMP"
-}
+//func endProgramInfiniteLoop() -> String {
+//    return "\n(END)\n@END\n0;JMP"
+//}
 
 func openFiles(){
     if CommandLine.arguments.dropFirst().count == 0 {
@@ -55,7 +56,7 @@ func openFiles(){
         else {
             print("ERROR: Could not create target file.")
             return}
-        print(bootStrapCode())
+        //print(bootStrapCode())
         processFile(fileName:fileName)
         //print(endProgramInfiniteLoop())
         fclose(sourceFile)
@@ -143,6 +144,11 @@ func processFile(fileName:String) {
         if let  _ = parser.returnInstruction(line:line){
             print("// return")
             print(codeWriter.writeReturn() ?? "")
+        }
+        
+        if let (functionName, nArgs) = parser.callInstruction(line: line) {
+            print("// call " + functionName + " " + nArgs)
+            print(codeWriter.writeCall(functionName: functionName, nArgs: nArgs) ?? "")
         }
     }
     
