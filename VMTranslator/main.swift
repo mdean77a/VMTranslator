@@ -19,6 +19,7 @@ var codeWriter = CodeWriter()
 // includes symbolic labels.  A cludge but it works.
 var lineCounter = 0
 var fileName = ""
+var staticFileName = ""
 
 enum CommandType {
     case C_ARITHMETIC, C_PUSH, C_POP, C_LABEL, C_GOTO, C_IF, C_FUNCTION, C_RETURN, C_CALL
@@ -32,7 +33,9 @@ let operators: Set<String> = ["add","sub","neg","eq","gt","lt","and","or","not"]
 func bootStrapCode() -> String {
     // This function will create the code to initialize the computer and will call the required program to start the game.
     //return("@Sys.init\n0;JMP\n")  THIS IS WRONG.  NEED TO CALL Sys.init, NOT GOTO Sys.init.
-    return "// BOOTSTRAP WILL GO HERE"
+    let setStackPointer = "@256\nD=A\n@SP\nM=D\n"
+    let callSysInit = codeWriter.writeCall(functionName: "Sys.init", nArgs: "0") ?? ""
+    return setStackPointer + callSysInit
 }
 
 //func endProgramInfiniteLoop() -> String {
@@ -82,6 +85,7 @@ func openFiles(){
         print(bootStrapCode())
         for vmFile in vmFilePaths{
             fileName = url.lastPathComponent + "/" + vmFile.split(separator: ".").first!
+            staticFileName = String(vmFile.split(separator: ".").first!)
             guard let sourceFile = freopen(fileName + ".vm", "r", stdin) else {
                 print("ERROR: Could not open the source file.")
                 return

@@ -257,9 +257,10 @@ struct CodeWriter{
                     """
             }
         case "static":
+            
             return
                 """
-                @\(fileName).\(value)
+                @\(staticFileName).\(value)
                 D=M
                 @SP
                 A=M
@@ -413,7 +414,7 @@ struct CodeWriter{
                 M=M-1
                 A=M
                 D=M
-                @\(fileName).\(value)
+                @\(staticFileName).\(value)
                 M=D
                 
                 """
